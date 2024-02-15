@@ -1,10 +1,13 @@
-use crate::exercises::{
-    fibonacci_numbers_less_than, find_mastic_combinations, has_adjacent_duplicates,
-    has_duplicate_digits_with_hashset, is_armstrong, is_automorphic, is_divisible_by_its_digits,
-    multiply_without_operator, read_pair_of_values, read_single_value, sieve_of_eratosthenes,
-};
-use std::cmp::Ordering;
-use std::cmp::Ordering::{Equal, Greater, Less};
+use crate::exercises::{fibonacci_numbers_less_than, find_mastic_combinations,
+                       has_adjacent_duplicates, has_duplicate_digits_with_hashset,
+                       is_armstrong, is_automorphic, is_divisible_by_its_digits,
+                       multiply_without_operator, read_pair_of_values, read_single_value,
+                       sieve_of_eratosthenes, transform_data};
+use rayon::iter::IntoParallelRefIterator;
+use rayon::iter::ParallelIterator;
+use std::cmp::Ordering::{Equal, Greater};
+use std::time::Instant;
+
 mod exercises;
 
 fn main() {
@@ -149,4 +152,13 @@ fn main() {
             print!("{} ", num);
         }
     });
+
+
+    // Доп задание
+    let data: Vec<i64> = (1..=1000000).collect();
+
+    let start = Instant::now();
+    println!("Сумма квадратов чисел, делящихся на 3: {}", transform_data(data));
+    let finish = start.elapsed();
+    println!("Время выполнения: {:?}", finish);
 }

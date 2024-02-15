@@ -1,8 +1,9 @@
-use std::cmp::Ordering::{Equal, Greater, Less};
+use std::cmp::Ordering::{Less};
 use std::collections::HashSet;
 use std::io;
 use std::str::FromStr;
-
+use rayon::iter::IntoParallelRefIterator;
+use rayon::iter::ParallelIterator;
 
 pub fn read_single_value<T>() -> Result<T, &'static str>
 where
@@ -267,4 +268,13 @@ pub fn is_divisible_by_its_digits(num: u32) -> bool {
         c.to_digit(10)
             .map_or(false, |digit| digit != 0 && num % digit == 0)
     })
+}
+
+
+// Доп задание
+pub fn transform_data(data: Vec<i64>) -> i64 {
+    data.par_iter() // Используем параллельный итератор
+        .filter(|&&x| x % 3 == 0 && x % 5 == 0) // Фильтруем числа, делящиеся на 3
+        .map(|&x| x * x) // Возводим каждое число в квадрат
+        .sum() // Суммируем все квадраты
 }
