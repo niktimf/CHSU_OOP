@@ -1,6 +1,6 @@
-mod part1;
+mod exercises;
 
-use crate::part1::{calculate_and_print, calculate_distance, read_input, read_point_coordinates};
+use crate::exercises::{calculate_and_print, calculate_distance, read_input, read_point_coordinates};
 use rand::Rng;
 
 
