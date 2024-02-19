@@ -1,7 +1,9 @@
 use std::cmp::Ordering::{Less};
 use std::collections::HashSet;
 use std::io;
+use std::ops::{Add, Mul, Neg, Sub};
 use std::str::FromStr;
+use num_traits::{Num, NumCast, PrimInt, Signed, zero};
 use rayon::iter::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
 
@@ -37,14 +39,17 @@ where
     Ok((first, second))
 }
 
-
+/*
 // Задание 2
 // Напишите программу, которая получает два целых числа и находит их произведение, не используя операцию умножения. Учтите, что числа могут быть отрицательными.
 // Пример:
 // Введите два числа:
 // 10 -15
 // 10 * (-15) = -150
-pub fn multiply_without_operator(a: i32, b: i32) -> i32 {
+pub fn multiply_without_operator<T>(a: T, b: T) -> T
+    where
+    T: From<i32> + std::ops::Mul<Output = T> + PartialOrd + std::ops::Neg<Output = T>  {
+    let zero = T::from(0);
     match (a, b) {
         (0, _) | (_, 0) => 0,
         (a, b) => {
@@ -56,7 +61,7 @@ pub fn multiply_without_operator(a: i32, b: i32) -> i32 {
             // _, представляет каждый элемент итератора,
             // но в данном случае он не используется (что обозначается символом _, указывающим на игнорирование значения),
             // поскольку для агрегации используется только значение a, не зависящее от элементов итератора.
-            match b.cmp(&0) {
+            match b.cmp(&zero) {
                 Less => -result,
                 _ => result,
             }
@@ -71,6 +76,20 @@ pub fn multiply_without_operator(a: i32, b: i32) -> i32 {
             //     result
             // }
         }
+    }
+}
+
+ */
+
+pub fn multiply_without_operator<T>(a: T, b: T) -> T
+    where
+        T: PrimInt + Add<Output = T> + Sub<Output = T> + Neg<Output = T> + Mul<Output = T> + PartialOrd + NumCast,
+{
+    let zero = T::from(0).expect("Error converting 0 to T");
+    match (b > zero, b < zero) {
+        (true, false) => (0..T::to_usize(&b).unwrap()).fold(zero, |acc, _| acc + a),
+        (false, true) => (0..T::to_usize(&(-b)).unwrap()).fold(zero, |acc, _| acc + a) - a - a, // Для отрицательного b
+        _ => zero,
     }
 }
 
