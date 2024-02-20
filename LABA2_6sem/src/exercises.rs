@@ -1,11 +1,12 @@
-use std::cmp::Ordering::{Less};
+use num_traits::{zero, FromPrimitive, Num, NumCast, PrimInt, Signed};
+use rayon::iter::IntoParallelRefIterator;
+use rayon::iter::ParallelIterator;
+use std::cmp::Ordering::Less;
 use std::collections::HashSet;
+use std::hash::Hash;
 use std::io;
 use std::ops::{Add, Mul, Neg, Sub};
 use std::str::FromStr;
-use num_traits::{Num, NumCast, PrimInt, Signed, zero};
-use rayon::iter::IntoParallelRefIterator;
-use rayon::iter::ParallelIterator;
 
 pub fn read_single_value<T>() -> Result<T, &'static str>
 where
@@ -18,7 +19,6 @@ where
         .parse::<T>()
         .map_err(|_| "Ошибка парсинга значения")
 }
-
 
 pub fn read_pair_of_values<T: FromStr>() -> Result<(T, T), &'static str>
 where
@@ -82,8 +82,8 @@ pub fn multiply_without_operator<T>(a: T, b: T) -> T
  */
 
 pub fn multiply_without_operator<T>(a: T, b: T) -> T
-    where
-        T: PrimInt + Add<Output = T> + Sub<Output = T> + Neg<Output = T> + Mul<Output = T> + PartialOrd + NumCast,
+where
+    T: PrimInt + Add<Output = T> + Sub<Output = T> + Neg<Output = T> + PartialOrd + NumCast,
 {
     let zero = T::from(0).expect("Error converting 0 to T");
     match (b > zero, b < zero) {
@@ -93,16 +93,20 @@ pub fn multiply_without_operator<T>(a: T, b: T) -> T
     }
 }
 
-
 // Задание 3
 // Ввести натуральное число N и вычислить сумму всех чисел Фибоначчи, меньших N. Предусмотрите защиту от ввода отрицательного числа N.
 // Пример:
 // Введите число N:
 // 10000
 // Сумма 17710
-pub fn fibonacci_numbers_less_than(n: u64) -> Vec<u64> {
+pub fn fibonacci_numbers_less_than<T>(n: T) -> Vec<T>
+where
+    T: Num + Copy + PartialOrd + FromPrimitive,
+{
     let mut fibonacci_numbers = Vec::new();
-    let (mut a, mut b) = (0, 1);
+    let zero = T::from_u64(0).unwrap();
+    let one = T::from_u64(1).unwrap();
+    let (mut a, mut b) = (zero, one);
     while b < n {
         fibonacci_numbers.push(b);
         let next = a + b;
@@ -112,7 +116,6 @@ pub fn fibonacci_numbers_less_than(n: u64) -> Vec<u64> {
 
     fibonacci_numbers
 }
-
 
 // Задвние 5
 // Ввести натуральное число и определить, верно ли,
@@ -126,11 +129,8 @@ pub fn fibonacci_numbers_less_than(n: u64) -> Vec<u64> {
 // Введите натуральное число:
 // 12245
 // Да
-pub fn has_adjacent_duplicates(num: String) -> bool {
-    num.chars()
-        .collect::<Vec<char>>()
-        .windows(2)
-        .any(|window| window[0] == window[1])
+pub fn has_adjacent_duplicates<T: PartialEq>(sequence: &[T]) -> bool {
+    sequence.windows(2).any(|window| window[0] == window[1])
     // let digits = num.chars().collect::<Vec<char>>();
     // for i in 0..digits.len() - 1 {
     //     if digits[i] == digits[i + 1] {
@@ -139,7 +139,6 @@ pub fn has_adjacent_duplicates(num: String) -> bool {
     // }
     // false
 }
-
 
 // Задание 6
 // Ввести натуральное число и определить, верно ли,
@@ -153,29 +152,22 @@ pub fn has_adjacent_duplicates(num: String) -> bool {
 // Введите натуральное число:
 // 12345
 // Нет
-pub fn has_duplicate_digits_with_hashset(num: String) -> bool {
+pub fn has_duplicate_digits_with_hashset<T>(num: &[T]) -> bool
+where
+    T: Hash + Eq,
+{
     let mut seen = HashSet::new();
-    num.chars().any(|digit| !seen.insert(digit))
+    num.iter().any(|digit| !seen.insert(digit))
 }
 
-pub fn has_duplicate_digits_with_loops(num: &str) -> bool {
-    num.chars().enumerate().any(|(i, digit)| {
-        num.chars()
-            .skip(i + 1)
-            .any(|next_digit| digit == next_digit)
-    })
-    // let digits = num.chars().collect::<Vec<char>>(); // Преобразование в вектор для индексированного доступа
-    // for i in 0..digits.len() {
-    //     for j in i + 1..digits.len() {
-    //         if digits[i] == digits[j] {
-    //             // Найдена пара одинаковых цифр
-    //             return true;
-    //         }
-    //     }
-    // }
-    // false
+pub fn has_duplicate_digits_with_loops<T>(num: &[T]) -> bool
+where
+    T: Hash + Eq,
+{
+    num.iter()
+        .enumerate()
+        .any(|(i, digit)| num.iter().skip(i + 1).any(|next_digit| digit == next_digit))
 }
-
 
 // Задание 8
 // Натуральное число называется числом Армстронга, если сумма цифр числа,
@@ -191,7 +183,6 @@ pub fn is_armstrong(num: u32) -> bool {
     let sum: u32 = digits.iter().map(|&d| d.pow(3)).sum();
     sum == num
 }
-
 
 // Задание 9
 // Натуральное число называется автоморфным, если оно равно последним цифрам своего квадрата.
@@ -216,7 +207,6 @@ pub fn is_automorphic(num: u64) -> bool {
     square_str.ends_with(&num_str)
 }
 
-
 // Задание 10
 // Напишите программу, которая получает натуральные числа A и B (A<B) и выводит все простые числа в интервале от A до B.
 // Пример:
@@ -239,7 +229,6 @@ pub fn sieve_of_eratosthenes(n: usize) -> Vec<usize> {
     // Оставляем только простые числа
     (2..=n).filter(|&i| sieve[i]).collect()
 }
-
 
 // Задание 11
 // В магазине продается мастика в ящиках по 15 кг, 17 кг, 21 кг.
@@ -275,7 +264,6 @@ pub fn find_mastic_combinations(
     combinations
 }
 
-
 // Задание 12
 // Ввести натуральное число N и вывести все натуральные числа, не превосходящие N и делящиеся на каждую из своих цифр.
 // Пример:
@@ -289,11 +277,10 @@ pub fn is_divisible_by_its_digits(num: u32) -> bool {
     })
 }
 
-
 // Доп задание
 pub fn transform_data(data: Vec<i64>) -> i64 {
     data.par_iter() // Используем параллельный итератор
-        .filter(|&&x| x % 3 == 0 && x % 5 == 0) // Фильтруем числа, делящиеся на 3
+        .filter(|&&x| x % 3 == 0 && x % 5 == 0) // Фильтруем числа, делящиеся на 3 и на 5
         .map(|&x| x * x) // Возводим каждое число в квадрат
         .sum() // Суммируем все квадраты
 }

@@ -1,8 +1,9 @@
-use crate::exercises::{fibonacci_numbers_less_than, find_mastic_combinations,
-                       has_adjacent_duplicates, has_duplicate_digits_with_hashset,
-                       is_armstrong, is_automorphic, is_divisible_by_its_digits,
-                       multiply_without_operator, read_pair_of_values, read_single_value,
-                       sieve_of_eratosthenes, transform_data};
+use crate::exercises::{
+    fibonacci_numbers_less_than, find_mastic_combinations, has_adjacent_duplicates,
+    has_duplicate_digits_with_hashset, is_armstrong, is_automorphic, is_divisible_by_its_digits,
+    multiply_without_operator, read_pair_of_values, read_single_value, sieve_of_eratosthenes,
+    transform_data,
+};
 use rayon::iter::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
 use std::cmp::Ordering::{Equal, Greater};
@@ -27,14 +28,12 @@ fn main() {
         }
     }
 
-
     // Задание 2
     println!("Введите два числа:");
     let (a, b) = read_pair_of_values().expect("Ошибка чтения чисел");
 
-    let product = multiply_without_operator(a, b);
+    let product: i32 = multiply_without_operator(a, b);
     println!("{} * {} = {}", a, b, product);
-
 
     // Задание 3
     println!("Введите число N");
@@ -44,7 +43,6 @@ fn main() {
         fibonacci_numbers_less_than(n).iter().sum::<u64>()
     );
 
-
     // Задание 4
     println!("Введите натуральное число");
     let n: String = read_single_value().expect("Ошибка парсинга");
@@ -52,26 +50,25 @@ fn main() {
 
     println!("Сумма цифр {}", sum);
 
-
     // Задание 5
     println!("Введите натуральное число");
     let n: String = read_single_value().expect("Ошибка парсинга");
-    if has_adjacent_duplicates(n) {
+    let chars: Vec<char> = n.chars().collect();
+    if has_adjacent_duplicates(&chars) {
         println!("Да");
     } else {
         println!("Нет.");
     }
-
 
     // Задание 6
     println!("Введите натуральное число");
     let n: String = read_single_value().expect("Ошибка парсинга");
-    if has_duplicate_digits_with_hashset(n) {
+    let chars: Vec<char> = n.chars().collect();
+    if has_duplicate_digits_with_hashset(&chars) {
         println!("Да");
     } else {
         println!("Нет.");
     }
-
 
     // Задание 7
     let start = 10000;
@@ -79,7 +76,6 @@ fn main() {
     (start..=end)
         .filter(|&num| num % 133 == 125 && num % 134 == 111)
         .for_each(|num| println!("{}", num));
-
 
     // Задание 8
     println!("Трехзначные числа Армстронга:");
@@ -95,7 +91,6 @@ fn main() {
     //     }
     // }
 
-
     // Задание 9
     println!("Введите N");
     let n: u64 = read_single_value().expect("Ошибка парсинга");
@@ -104,7 +99,6 @@ fn main() {
             println!("{} * {} = {}", x, x, x * x);
         }
     });
-
 
     // Задание 10
     println!("Введите два целых числа");
@@ -126,7 +120,6 @@ fn main() {
         }
     }
 
-
     // Задание 11
     let crate1_weight = 15;
     let crate2_weight = 17;
@@ -143,7 +136,6 @@ fn main() {
     }
     println!("Всего способов: {}", combinations.len());
 
-
     // Задание 12
     println!("Введите N");
     let n: u32 = read_single_value().expect("Ошибка парсинга");
@@ -153,12 +145,14 @@ fn main() {
         }
     });
 
-
     // Доп задание
     let data: Vec<i64> = (1..=1000000).collect();
 
     let start = Instant::now();
-    println!("Сумма квадратов чисел, делящихся на 3: {}", transform_data(data));
+    println!(
+        "Сумма квадратов чисел, делящихся на 3 и на 5: {}",
+        transform_data(data)
+    );
     let finish = start.elapsed();
     println!("Время выполнения: {:?}", finish);
 }
