@@ -86,10 +86,14 @@ where
     T: PrimInt + Add<Output = T> + Sub<Output = T> + Neg<Output = T> + PartialOrd + NumCast,
 {
     let zero = T::from(0).expect("Error converting 0 to T");
-    match (b > zero, b < zero) {
-        (true, false) => (0..T::to_usize(&b).unwrap()).fold(zero, |acc, _| acc + a),
-        (false, true) => (0..T::to_usize(&(-b)).unwrap()).fold(zero, |acc, _| acc + a) - a - a, // Для отрицательного b
-        _ => zero,
+    let abs_a = if a < zero { -a } else { a };
+    let abs_b = if b < zero { -b } else { b };
+
+    // Вычисляем результат умножения, используя абсолютные значения
+    let result = (0..T::to_usize(&abs_b).unwrap()).fold(zero, |acc, _| acc + abs_a);
+    match (a > zero, b > zero) {
+        (true, true) | (false, false) => result,
+        (false, true) | (true, false) => -result,
     }
 }
 
