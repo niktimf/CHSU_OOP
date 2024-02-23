@@ -58,4 +58,5 @@ fn main() {
     println!("Слова: {:?}, количество: {}", words, words.len());
 
      */
+
 }

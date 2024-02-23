@@ -49,11 +49,10 @@ where
 // Задание 2
 // Напишите программу, которая заполняет квадратную матрицу случайными числами в интервале [10,99],
 // и находит максимальный и минимальный элементы в матрице и их индексы.
-
 #[derive(Debug)]
 pub struct SquareMatrix<T> {
-    size: usize,
-    matrix_data: Vec<Vec<T>>,
+    pub size: usize,
+    pub matrix_data: Vec<Vec<T>>,
 }
 
 impl<T> SquareMatrix<T>
@@ -119,7 +118,6 @@ where
 // Словом считается последовательности непробельных символов,
 // отделенная с двух сторон пробелами (или стоящая с краю строки).
 // Слова могут быть разделены несколькими пробелами, в начале и в конце строки тоже могут быть пробелы.
-
 pub fn get_longest_white_spaced_element_with_length(s: &str) -> Option<(&str, usize)> {
     s.split_whitespace()
         .map(|word| (word, word.len()))
@@ -129,7 +127,6 @@ pub fn get_longest_white_spaced_element_with_length(s: &str) -> Option<(&str, us
 // Задание 4
 // Ввести с клавиатуры в одну строку фамилию, имя и отчество, разделив их пробелом.
 // Вывести фамилию и инициалы.
-
 pub fn get_initials(full_name: &str) -> String {
     let parts: Vec<&str> = full_name.split_whitespace().collect();
     match parts.len().cmp(&3) {
@@ -175,3 +172,4 @@ where
         .map(|word| word.into_iter().map(|c| c.to_string()).collect::<String>())
         .collect()
 }
+
