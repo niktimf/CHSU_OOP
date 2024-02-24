@@ -1,13 +1,18 @@
 use rand::distributions::uniform::SampleUniform;
 use rand::distributions::{Distribution, Uniform};
-use rand::{thread_rng, Rng};
-use std::cmp::Ordering::{Equal, Greater, Less};
+use rand::thread_rng;
+use std::cmp::Ordering::{Equal, Greater};
+use std::fs::File;
 use std::io;
+use std::io::BufRead;
+use std::io::Write;
+use std::path::PathBuf;
 use std::str::FromStr;
 
 pub fn read_single_value<T>() -> Result<T, &'static str>
 where
     T: FromStr,
+    T::Err: std::fmt::Debug,
 {
     let mut input = String::new();
     io::stdin().read_line(&mut input).expect("Ошибка чтения");
@@ -173,3 +178,138 @@ where
         .collect()
 }
 
+// Задание 6
+// Напишите программу, которая находит минимальное и максимальное среди чётных положительных чисел,
+// записанных в файле, и выводит результат в другой файл. Учтите, что таких чисел может вообще не быть.
+#[derive(Debug)]
+pub struct FileIOProcessor {
+    pub input_path: PathBuf,
+    pub output_path: PathBuf,
+}
+
+impl FileIOProcessor {
+    // Конструктор для создания нового экземпляра NumberProcessor
+    pub fn new(input_path: PathBuf, output_path: PathBuf) -> Self {
+        FileIOProcessor {
+            input_path,
+            output_path,
+        }
+    }
+}
+
+pub trait EvenNumberFileFinder {
+    fn read_numbers(&self) -> io::Result<Vec<i32>>;
+    fn find_max_even_number(&self, numbers: &[i32]) -> Option<i32>;
+    fn find_min_even_number(&self, numbers: &[i32]) -> Option<i32>;
+    fn write_numbers_result(&self, min: i32, max: i32) -> Result<(), io::Error>;
+}
+
+impl EvenNumberFileFinder for FileIOProcessor {
+    // Метод для чтения чисел из файла
+    fn read_numbers(&self) -> io::Result<Vec<i32>> {
+        let file = File::open(&self.input_path)?;
+        let buf = io::BufReader::new(file);
+
+        let numbers = buf
+            .lines()
+            .filter_map(Result::ok)
+            .flat_map(|line| {
+                line.replace(",", " ")
+                    .split_whitespace()
+                    .filter_map(|word| word.parse::<i32>().ok())
+                    .collect::<Vec<i32>>()
+            })
+            .collect();
+
+        Ok(numbers)
+    }
+
+    // Метод для нахождения максимального чётного числа среди положительных чисел
+    fn find_max_even_number(&self, numbers: &[i32]) -> Option<i32> {
+        numbers
+            .iter()
+            .filter(|&n| n > &0 && n % 2 == 0)
+            .max()
+            .cloned()
+    }
+
+    // Метод для нахождения минимального чётного числа среди положительных чисел
+    fn find_min_even_number(&self, numbers: &[i32]) -> Option<i32> {
+        numbers
+            .iter()
+            .filter(|&n| n > &0 && n % 2 == 0)
+            .min()
+            .cloned()
+    }
+
+    // Метод для записи результата в файл
+    fn write_numbers_result(&self, min: i32, max: i32) -> Result<(), io::Error> {
+        let mut file = File::create(&self.output_path)?;
+        writeln!(file, "Минимальное чётное число: {}", min)?;
+        writeln!(file, "Максимальное чётное число: {}", max)?;
+        Ok(())
+    }
+}
+
+// Задание 7
+// В файле записаны данные о результатах сдачи экзамена. Каждая строка содержит фамилию, имя и количество баллов, разделённые пробелами:
+// <Фамилия> <Имя> <Количество баллов>
+// Вывести в другой файл фамилии и имена тех учеников, которые получили больше 80 баллов.
+
+pub trait FileExamResultsProcessor {
+    fn read_exam_results(&self) -> io::Result<Vec<String>>;
+    fn filter_exam_results(&self, results: &[String], exam_threshold: u32) -> Vec<String>;
+    fn write_exam_results(&self, results: &[String]) -> Result<(), io::Error>;
+}
+
+impl FileExamResultsProcessor for FileIOProcessor {
+    // Метод для чтения результатов экзамена из файла
+    fn read_exam_results(&self) -> io::Result<Vec<String>> {
+        let file = File::open(&self.input_path)?;
+        let buf = io::BufReader::new(file);
+
+        let results = buf.lines().filter_map(Result::ok).collect();
+
+        Ok(results)
+    }
+
+    fn filter_exam_results(&self, results: &[String], exam_threshold: u32) -> Vec<String> {
+        results
+            .iter()
+            .filter_map(|result| {
+                let parts: Vec<&str> = result.split_whitespace().collect();
+                if parts.len() == 3 {
+                    let score = parts[2].parse::<u32>().unwrap_or(0);
+                    if score > exam_threshold {
+                        Some(format!("{} {}", parts[0], parts[1]))
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+
+    // Метод для записи результатов экзамена в файл
+    fn write_exam_results(&self, results: &[String]) -> Result<(), io::Error> {
+        let mut file = File::create(&self.output_path)?;
+        results
+            .iter()
+            .for_each(|result| writeln!(file, "{}", result).unwrap());
+        Ok(())
+    }
+}
+
+// Задание 8
+// Предприятие "ИП Ромашка" задается строкой следующего вида: должность, пол, численность сотрудников.
+// Вывести на печать количество мужчин и женщин.
+// Ввод:
+// Director man 2
+// Director woman 3
+// Worker man 7
+// Worker woman 2
+// Вывод:
+// man 9
+// woman 5
