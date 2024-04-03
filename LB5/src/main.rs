@@ -1,6 +1,5 @@
 use std::cmp::Ordering::Equal;
 use std::fmt::Display;
-use std::marker::PhantomData;
 
 // Определение структуры узла списка
 struct Node<T> {
@@ -11,7 +10,6 @@ struct Node<T> {
 // Определение структуры односвязного списка
 struct LinkedList<T> {
     head: Option<Box<Node<T>>>,
-    //_marker: PhantomData<T>,
 }
 
 impl<T> LinkedList<T> {
@@ -19,7 +17,6 @@ impl<T> LinkedList<T> {
     fn new() -> Self {
         LinkedList {
             head: None,
-            //_marker: PhantomData,
         }
     }
 
