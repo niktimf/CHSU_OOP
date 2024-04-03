@@ -11,7 +11,9 @@ struct StringArray {
 impl StringArray {
     // Конструктор по умолчанию
     fn new() -> Self {
-        StringArray { strings: Vec::new() }
+        StringArray {
+            strings: Vec::new(),
+        }
     }
 
     // Конструктор из вектора строк
@@ -72,7 +74,13 @@ impl Mul<usize> for StringArray {
     type Output = StringArray;
 
     fn mul(self, rhs: usize) -> StringArray {
-        let repeated_strings = self.strings.iter().cloned().cycle().take(self.strings.len() * rhs).collect();
+        let repeated_strings = self
+            .strings
+            .iter()
+            .cloned()
+            .cycle()
+            .take(self.strings.len() * rhs)
+            .collect();
         StringArray::from_vec(repeated_strings)
     }
 }
@@ -105,9 +113,11 @@ impl fmt::Display for StringArray {
 
 // Функция, которая выполняет слияние объектов и лексикографическое упорядочение строк
 fn merge_and_sort(arrays: &[StringArray]) -> StringArray {
-    arrays.iter().fold(StringArray::new(), |acc, array| acc.merge(array)).sort()
+    arrays
+        .iter()
+        .fold(StringArray::new(), |acc, array| acc.merge(array))
+        .sort()
 }
-
 
 fn main() {
     let mut arr1 = StringArray::from_vec(vec![
